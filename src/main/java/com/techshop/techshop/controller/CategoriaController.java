@@ -1,49 +1,65 @@
 package com.techshop.techshop.controller;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.net.URI;
 import java.util.List;
-import java.util.Map;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.techshop.techshop.model.Categoria;
+import com.techshop.techshop.repository.CategoriaRepository;
 
 @RestController
 @RequestMapping("/api/categorias")
 public class CategoriaController {
 
-    private List<Map<String, Object>> getCategoriasMock() {
-        List<Map<String, Object>> categorias = new ArrayList<>();
+    private final CategoriaRepository categoriaRepository;
 
-        Map<String, Object> cat1 = new HashMap<>();
-        cat1.put("id", 1);
-        cat1.put("nombre", "Periféricos");
-        cat1.put("descripcion", "Teclados, mouses y audífonos");
-
-        Map<String, Object> cat2 = new HashMap<>();
-        cat2.put("id", 2);
-        cat2.put("nombre", "Pantallas");
-        cat2.put("descripcion", "Monitores para gaming y oficina");
-
-        categorias.add(cat1);
-        categorias.add(cat2);
-        return categorias;
+    public CategoriaController(CategoriaRepository categoriaRepository) {
+        this.categoriaRepository = categoriaRepository;
     }
 
-    // Obtener todas las categorías
     @GetMapping
-    public List<Map<String, Object>> obtenerCategorias() {
-        return getCategoriasMock();
+    public List<Categoria> obtenerCategorias() {
+        return categoriaRepository.findAll();
     }
 
-    // Filtrar categoría por ID
     @GetMapping("/{id}")
-    public Map<String, Object> obtenerCategoriaPorId(@PathVariable Integer id) {
-        return getCategoriasMock().stream()
-                .filter(c -> c.get("id").equals(id))
-                .findFirst()
-                .orElse(null);
+    public Categoria obtenerCategoriaPorId(@PathVariable Integer id) {
+        return categoriaRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoría no encontrada"));
+    }
+
+    @PostMapping
+    public ResponseEntity<Categoria> crearCategoria(@RequestBody Categoria categoria) {
+        categoria.setId(null);
+        Categoria guardada = categoriaRepository.save(categoria);
+        return ResponseEntity.created(URI.create("/api/categorias/" + guardada.getId())).body(guardada);
+    }
+
+    @PutMapping("/{id}")
+    public Categoria actualizarCategoria(@PathVariable Integer id, @RequestBody Categoria datos) {
+        Categoria categoria = obtenerCategoriaPorId(id);
+        categoria.setNombre(datos.getNombre());
+        categoria.setDescripcion(datos.getDescripcion());
+        return categoriaRepository.save(categoria);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarCategoria(@PathVariable Integer id) {
+        if (!categoriaRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoría no encontrada");
+        }
+        categoriaRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }
