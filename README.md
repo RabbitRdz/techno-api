@@ -94,6 +94,8 @@ $env:DB_PASSWORD = [System.Net.NetworkCredential]::new("", $securePassword).Pass
 
 ## Endpoints de la API REST
 
+Para configurar el acceso desde otros equipos conectados al router y probar todos los controladores (incluido ARCO) en Postman, consulta el [Manual de red y controladores para Postman](./MANUAL_POSTMAN.md).
+
 | Método | Endpoint | Descripción |
 | :--- | :--- | :--- |
 | **GET** | `/api/productos` | Obtiene la lista completa de productos. |
@@ -121,6 +123,11 @@ $env:DB_PASSWORD = [System.Net.NetworkCredential]::new("", $securePassword).Pass
 | **POST** | `/api/personas` | Crea una persona. |
 | **PUT** | `/api/personas/{id}` | Actualiza una persona. |
 | **DELETE** | `/api/personas/{id}` | Elimina una persona. |
+| **GET** | `/api/arco/acceso/{idPersona}` | Consulta datos, preferencias e historial de una persona. |
+| **PUT** | `/api/arco/rectificacion/{idPersona}` | Rectifica datos personales. |
+| **DELETE** | `/api/arco/cancelacion/{idPersona}` | Cancela y anonimiza los datos personales. |
+| **PATCH** | `/api/arco/oposicion/{idPersona}` | Actualiza preferencias de privacidad. |
+| **GET** | `/api/arco/solicitudes/{idPersona}` | Consulta historial de solicitudes ARCO. |
 
 Para crear un producto, envía por ejemplo `POST /api/productos` con `Content-Type: application/json`:
 
